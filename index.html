@@ -1,0 +1,665 @@
+<title>三次会ミリオネア</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Noto+Sans+JP:wght@500;700;900&family=Noto+Serif+JP:wght@600&display=swap">
+
+<style>
+:root{
+  --s:1;
+  --void:#02040a;
+  --plate-ink:#010509;
+  --cyan:#25c9f2;
+  --cyan-hi:#b6efff;
+  --cyan-dim:#0d5c7d;
+  --gold:#f4c94e;
+  --gold-hi:#ffeaa0;
+  --orange:#f5a623;
+  --orange-deep:#e07c14;
+  --green:#2fbf6d;
+  --red:#d93b2b;
+  --slate:#8ea6c2;
+  --slate-dim:#4d6484;
+  --hex-q:polygon(52px 0%, calc(100% - 52px) 0%, 100% 50%, calc(100% - 52px) 100%, 52px 100%, 0% 50%);
+  --hex-a:polygon(28px 0%, calc(100% - 28px) 0%, 100% 50%, calc(100% - 28px) 100%, 28px 100%, 0% 50%);
+  --hex-s:polygon(15px 0%, calc(100% - 15px) 0%, 100% 50%, calc(100% - 15px) 100%, 15px 100%, 0% 50%);
+  --f-logo:"Dela Gothic One","Hiragino Sans",sans-serif;
+  --f-body:"Helvetica Neue",Arial,"Noto Sans JP","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  --f-num:"Helvetica Neue",Arial,"Noto Sans JP",sans-serif;
+  --f-cap:"Times New Roman","Noto Serif JP",serif;
+}
+
+*{box-sizing:border-box}
+body{margin:0; min-height:100vh; background:var(--void); color:#fff; font-family:var(--f-body); -webkit-font-smoothing:antialiased}
+.shell{max-width:1280px; margin:0 auto; padding:20px 16px 56px}
+
+/* ══ ロゴ列 ══ */
+.logo-row{display:flex; align-items:flex-end; justify-content:space-between; gap:18px; flex-wrap:wrap; margin-bottom:14px}
+.logo{transform:skewX(-7deg); line-height:1}
+.logo .mark{
+  font-family:var(--f-logo); font-size:clamp(24px,4.2vw,38px);
+  background:linear-gradient(180deg,#ffffff 6%,#dff3ff 34%,#8fbbd6 52%,#ffffff 62%,#7ba3c2 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  filter:drop-shadow(0 2px 0 #05304a) drop-shadow(0 0 14px rgba(37,201,242,.4));
+}
+.logo .mark .yen{
+  background:linear-gradient(180deg,#fff6d0 6%,var(--gold) 44%,#a97a12 100%);
+  -webkit-background-clip:text; background-clip:text; color:transparent; padding:0 .04em;
+}
+.logo .sub{display:block; transform:skewX(7deg); margin-top:7px; font-family:var(--f-num); font-weight:500; font-size:11px; letter-spacing:.28em; color:var(--slate)}
+.tools{display:flex; gap:8px; flex-wrap:wrap}
+.ghost{
+  font-family:var(--f-num); font-weight:700; font-size:11.5px; letter-spacing:.13em;
+  color:var(--slate); background:rgba(37,201,242,.06); border:1px solid var(--cyan-dim);
+  border-radius:2px; padding:9px 15px; cursor:pointer; transition:.16s;
+}
+.ghost:hover{color:var(--cyan-hi); border-color:var(--cyan)}
+.ghost[aria-pressed="true"]{background:var(--cyan); border-color:var(--cyan-hi); color:#00212e}
+.ghost:focus-visible{outline:2px solid var(--cyan-hi); outline-offset:2px}
+.ghost.key{background:rgba(244,201,78,.1); border-color:#7a6119; color:var(--gold-hi)}
+.ghost.key:hover{border-color:var(--gold); color:#fff}
+
+/* ══ 16:9 スクリーン ══ */
+.screen{width:100%; background:#000}
+.frame{
+  position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; background:#000;
+  border:1px solid #0a3247; box-shadow:0 0 0 1px rgba(37,201,242,.1), 0 22px 60px rgba(0,0,0,.9);
+}
+.stage{
+  position:absolute; top:0; left:0; width:1280px; height:720px;
+  transform-origin:top left; transform:scale(var(--s));
+  display:flex; flex-direction:column; padding:30px 46px 40px; isolation:isolate;
+}
+.screen:fullscreen{display:flex; align-items:center; justify-content:center; width:100vw; height:100vh}
+.screen:fullscreen .frame{width:min(100vw, calc(100vh * 16 / 9)); border:0; box-shadow:none}
+
+/* 放射バースト */
+.burst{position:absolute; inset:0; z-index:0; overflow:hidden}
+.burst .core{
+  position:absolute; left:50%; top:42%; transform:translate(-50%,-50%);
+  width:700px; height:700px; border-radius:50%; filter:blur(4px);
+  background:radial-gradient(circle,
+    rgba(214,158,240,.92) 0%, rgba(152,88,206,.62) 13%,
+    rgba(72,72,190,.42) 30%, rgba(28,62,150,.26) 50%, transparent 72%);
+}
+.burst .rays,.burst .rays2{position:absolute; inset:-30%}
+.burst .rays{
+  background:repeating-conic-gradient(from 0deg at 50% 50%, rgba(185,220,255,.30) 0deg .45deg, transparent .45deg 2.3deg);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%, transparent 5%, #000 24%, #000 58%, transparent 90%);
+  mask-image:radial-gradient(circle at 50% 50%, transparent 5%, #000 24%, #000 58%, transparent 90%);
+}
+.burst .rays2{
+  background:repeating-conic-gradient(from 1.1deg at 50% 50%, rgba(226,150,255,.22) 0deg .35deg, transparent .35deg 3.7deg);
+  -webkit-mask-image:radial-gradient(circle at 50% 50%, transparent 9%, #000 30%, transparent 78%);
+  mask-image:radial-gradient(circle at 50% 50%, transparent 9%, #000 30%, transparent 78%);
+}
+.ring{position:absolute; left:50%; top:42%; border:1px solid rgba(242,182,110,.17); border-radius:50%; pointer-events:none}
+.ring.r1{width:800px; height:200px; transform:translate(-50%,-50%) rotate(-16deg)}
+.ring.r2{width:750px; height:170px; transform:translate(-50%,-50%) rotate(14deg)}
+.ring.r3{width:560px; height:250px; transform:translate(-50%,-50%) rotate(72deg); border-color:rgba(140,190,255,.14)}
+.ring.r4{width:900px; height:130px; transform:translate(-50%,-50%) rotate(3deg)}
+.vig{
+  position:absolute; inset:0; z-index:1; pointer-events:none;
+  background:
+    radial-gradient(120% 84% at 50% 42%, transparent 34%, rgba(0,0,0,.55) 74%, #000 100%),
+    linear-gradient(180deg, rgba(0,0,0,.7) 0%, transparent 22%, transparent 50%, rgba(0,0,0,.88) 82%);
+}
+.stage > .hud, .stage > .qzone, .stage > .overlay, .stage > .finale{position:relative; z-index:2}
+body.suspense .burst{opacity:.34; transition:opacity .55s ease}
+body.suspense .hud{opacity:.3; transition:opacity .55s ease}
+
+/* ══ HUD ══ */
+.hud{display:flex; align-items:flex-start; justify-content:space-between; gap:20px}
+.qslot .cap{font-family:var(--f-cap); font-weight:600; font-size:15px; letter-spacing:.48em; color:var(--gold); margin:0 0 8px 8px}
+.qplate{display:inline-block; padding:3px; clip-path:var(--hex-s); background:var(--cyan); filter:drop-shadow(0 0 9px rgba(37,201,242,.45))}
+.qplate .in{clip-path:var(--hex-s); background:#000; padding:6px 30px; display:flex; align-items:baseline; gap:10px}
+.qplate .n{font-family:var(--f-num); font-weight:700; font-size:30px; color:var(--gold); font-variant-numeric:tabular-nums; line-height:1.1}
+.qplate .t{font-family:var(--f-num); font-weight:700; font-size:17px; color:#a9863a}
+
+.lifelines{display:flex; gap:13px}
+.ll{
+  position:relative; width:92px; height:56px; flex:none; padding:0; cursor:pointer;
+  border:3px solid var(--cyan); border-radius:50%; background:rgba(0,0,0,.72);
+  display:grid; place-items:center; transition:.16s;
+  box-shadow:0 0 12px rgba(37,201,242,.35), inset 0 0 16px rgba(37,201,242,.14);
+}
+.ll .fifty{font-family:var(--f-num); font-weight:700; font-size:19px; color:#fff}
+.ll svg{width:31px; height:31px; fill:#fff}
+.ll:hover:not(:disabled){border-color:#fff; box-shadow:0 0 22px rgba(37,201,242,.75)}
+.ll:focus-visible{outline:3px solid var(--gold-hi); outline-offset:3px}
+.ll:disabled{cursor:not-allowed; border-color:#2b4c5c; box-shadow:none; opacity:.5}
+.ll:disabled svg{fill:#5f7a8a}
+.ll:disabled .fifty{color:#5f7a8a}
+.ll:disabled::after{content:""; position:absolute; left:7px; right:7px; top:50%; height:3px; background:var(--red); transform:rotate(-22deg); border-radius:2px}
+
+/* ══ 出題ゾーン ══ */
+.qzone{margin-top:auto; padding-top:30px}
+.qrow{position:relative; margin-bottom:18px}
+.qrow::before,.qrow::after{content:""; position:absolute; top:50%; height:4px; width:400px; margin-top:-2px; z-index:0}
+.qrow::before{right:100%; background:linear-gradient(90deg, transparent, var(--cyan) 60%)}
+.qrow::after{left:100%; background:linear-gradient(270deg, transparent, var(--cyan) 60%)}
+
+.plate{
+  position:relative; z-index:1; display:block; width:100%; padding:3px; border:0;
+  background:var(--cyan); clip-path:var(--hex-a); cursor:pointer;
+  font-family:inherit; text-align:left; transition:background .18s;
+  filter:drop-shadow(0 0 10px rgba(37,201,242,.42));
+}
+.plate .in{clip-path:var(--hex-a); background:var(--plate-ink); padding:14px 34px; min-height:64px; display:flex; align-items:center; gap:13px}
+.qbox{clip-path:var(--hex-q); cursor:default; padding:4px}
+.qbox .in{clip-path:var(--hex-q); display:block; padding:24px 68px; min-height:112px}
+.qtext{margin:0; font-size:30px; font-weight:700; line-height:1.45; color:#fff}
+.qtext.long{font-size:26px}
+.qsub{margin:11px 0 0; font-family:var(--f-num); font-weight:500; font-size:14px; letter-spacing:.24em; color:var(--slate)}
+
+.arow{position:relative; display:grid; grid-template-columns:1fr 1fr; gap:26px; margin-bottom:15px}
+.arow::before,.arow::after{content:""; position:absolute; top:50%; height:4px; width:400px; margin-top:-2px; z-index:0}
+.arow::before{right:100%; background:linear-gradient(90deg, transparent, var(--cyan) 60%)}
+.arow::after{left:100%; background:linear-gradient(270deg, transparent, var(--cyan) 60%)}
+
+.letter{font-family:var(--f-num); font-weight:700; font-size:25px; color:var(--orange); flex:none; display:flex; align-items:center; gap:7px}
+.letter .dia{font-size:14px; color:var(--orange-deep); transform:translateY(-1px)}
+.atext{font-size:23px; font-weight:700; line-height:1.35; color:#fff}
+.atext.long{font-size:20px}
+.sw{width:24px; height:24px; flex:none; display:inline-block; margin-right:13px; border:1px solid rgba(255,255,255,.6); border-radius:3px; vertical-align:-4px; box-shadow:0 0 7px rgba(0,0,0,.5)}
+
+button.plate:hover:not(:disabled){background:#fff}
+.plate:focus-visible{outline:none; background:var(--gold-hi)}
+.plate:disabled{cursor:default}
+.plate.dead{opacity:.13; filter:none}
+.plate.dead .atext{text-decoration:line-through}
+.plate.sel{background:var(--orange)}
+.plate.sel .in{background:linear-gradient(180deg,#f7ae2e,#dd7d10); animation:throb 1s ease-in-out infinite}
+.plate.sel .letter,.plate.sel .letter .dia,.plate.sel .atext{color:#241202}
+.plate.right{background:#7dffbd}
+.plate.right .in{background:linear-gradient(180deg,#33c778,#0d6b3d); animation:flash .42s steps(1) 5}
+.plate.right .letter,.plate.right .letter .dia,.plate.right .atext{color:#fff}
+.plate.miss{background:#ff9d90}
+.plate.miss .in{background:linear-gradient(180deg,#d63a2a,#6d1409)}
+.plate.miss .letter,.plate.miss .letter .dia,.plate.miss .atext{color:#fff}
+@keyframes throb{0%,100%{filter:brightness(1)}50%{filter:brightness(1.25)}}
+@keyframes flash{0%{filter:brightness(1)}50%{filter:brightness(1.9)}100%{filter:brightness(1)}}
+
+/* 麻雀牌 */
+.tiles{display:flex; gap:5px; flex-wrap:wrap; align-items:flex-end; margin:16px 0 3px}
+.tile{
+  width:38px; height:52px; flex:none; border-radius:5px;
+  background:linear-gradient(180deg,#fdfaf1 0%,#e7e0cc 86%,#cbc2a7 100%);
+  box-shadow:0 2px 0 #a1977c, 0 3px 8px rgba(0,0,0,.6);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  font-family:"Hiragino Mincho ProN","Noto Serif JP",serif; font-weight:700; color:#17231a; line-height:1;
+}
+.tile span{font-size:17px}
+.tile span+span{font-size:13px; margin-top:2px; color:#2c4530}
+.tile.solo span{font-size:23px}
+.tile.red span{color:#b3271c}
+.tile-sep{width:15px; flex:none}
+.tsumo{display:flex; align-items:center; gap:8px; margin-left:6px}
+.tsumo-label{font-family:var(--f-num); font-weight:700; font-size:13px; letter-spacing:.18em; color:var(--gold)}
+
+/* ══ オーバーレイ ══ */
+.overlay{
+  position:absolute; left:50%; top:44%; transform:translate(-50%,-50%);
+  width:660px; background:rgba(0,4,10,.94);
+  border:3px solid var(--cyan); box-shadow:0 0 40px rgba(37,201,242,.42);
+  padding:26px 32px 22px; z-index:3;
+}
+.overlay h3{margin:0 0 18px; font-family:var(--f-num); font-weight:700; font-size:15px; letter-spacing:.24em; color:var(--cyan-hi); text-align:center}
+.poll{display:grid; gap:13px}
+.poll-row{display:grid; grid-template-columns:26px 1fr 62px; align-items:center; gap:14px}
+.poll-row .l{font-family:var(--f-num); font-weight:700; color:var(--orange); font-size:20px}
+.bar{height:18px; background:rgba(37,201,242,.1); border:1px solid rgba(37,201,242,.3)}
+.bar i{display:block; height:100%; background:linear-gradient(90deg,#1a7fc4,var(--cyan))}
+.poll-row .v{font-family:var(--f-num); font-weight:700; font-size:19px; text-align:right; color:#fff; font-variant-numeric:tabular-nums}
+.phone-line{margin:0; font-size:21px; line-height:1.75; color:#fff; text-align:center}
+.phone-line b{color:var(--gold-hi)}
+.ov-close{display:block; margin:20px auto 0; font-family:var(--f-num); font-weight:700; font-size:13px; letter-spacing:.16em; background:none; border:1px solid var(--cyan-dim); color:var(--slate); padding:7px 20px; cursor:pointer}
+.ov-close:hover{color:#fff; border-color:var(--cyan)}
+
+/* 終了 */
+.finale{text-align:center; margin:auto 0; padding:0 60px}
+.finale .big{
+  font-family:var(--f-logo); font-size:56px; margin:0 0 20px;
+  background:linear-gradient(180deg,#fff8e6,var(--gold) 58%,#a97e22);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.finale .score{font-family:var(--f-num); font-weight:700; font-size:20px; letter-spacing:.2em; color:var(--cyan); margin:0 0 28px}
+.finale p.line{max-width:860px; margin:0 auto; font-size:24px; line-height:1.85; color:#fff}
+
+/* ══ 司会卓（投影されない） ══ */
+.deck{margin-top:18px}
+.console{border:1px solid #0d3a52; background:linear-gradient(180deg,rgba(9,26,40,.75),rgba(2,6,14,.75)); padding:20px 24px; min-height:128px}
+.con-head{display:flex; align-items:center; gap:12px; margin-bottom:14px; flex-wrap:wrap}
+.con-head .lbl{font-family:var(--f-num); font-weight:700; font-size:11px; letter-spacing:.22em; color:var(--slate-dim)}
+.tagline{font-family:var(--f-num); font-weight:700; font-size:11px; letter-spacing:.12em; padding:4px 10px}
+.tagline.prep{background:rgba(240,140,42,.16); color:#ffb769; border:1px solid rgba(240,140,42,.5)}
+.tagline.free{background:rgba(47,191,109,.14); color:#6fd7a2; border:1px solid rgba(47,191,109,.45)}
+.cbar{display:flex; align-items:center; gap:15px; flex-wrap:wrap}
+.final-q{font-family:var(--f-logo); font-size:16px; color:var(--gold-hi)}
+.btn{
+  font-family:var(--f-body); font-weight:900; font-size:14.5px; letter-spacing:.05em;
+  padding:12px 28px; border:0; cursor:pointer; transition:.16s; clip-path:var(--hex-s);
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold) 52%,#b58a14); color:#2a1e02;
+}
+.btn:hover{filter:brightness(1.1)}
+.btn:focus-visible{outline:2px solid #fff; outline-offset:3px}
+.btn.calm{background:none; color:var(--slate); border:1px solid var(--cyan-dim); clip-path:none; font-family:var(--f-num); font-weight:700; font-size:12px; letter-spacing:.12em; padding:11px 20px}
+.btn.calm:hover{color:#fff; border-color:var(--cyan)}
+.idle-hint{font-size:13.5px; color:var(--slate); margin:0; line-height:1.9}
+.idle-hint kbd{font-family:var(--f-num); font-weight:700; font-size:11.5px; background:rgba(37,201,242,.12); border:1px solid var(--cyan-dim); border-radius:3px; padding:2px 7px; color:var(--cyan-hi); margin:0 2px}
+.dots{display:inline-flex; gap:6px; align-items:center}
+.dots i{width:8px; height:8px; border-radius:50%; background:var(--cyan); animation:blip 1.15s ease-in-out infinite}
+.dots i:nth-child(2){animation-delay:.19s}
+.dots i:nth-child(3){animation-delay:.38s}
+@keyframes blip{0%,100%{opacity:.18; transform:scale(.65)}50%{opacity:1; transform:scale(1)}}
+.verdict{font-family:var(--f-logo); font-size:20px; margin:0 0 11px}
+.verdict.ok{color:#63e8a1}
+.verdict.ng{color:#ff8f80}
+.console .say{margin:0 0 14px; font-size:15px; line-height:1.8; color:#fff}
+.mc-tip{display:flex; gap:11px; align-items:flex-start; font-size:13.5px; line-height:1.75; color:var(--gold-hi); background:rgba(244,201,78,.06); border:1px dashed rgba(244,201,78,.4); padding:11px 14px}
+.mc-tip .tag{font-family:var(--f-num); font-weight:700; font-size:10px; letter-spacing:.14em; flex:none; background:var(--gold); color:#2a1e02; padding:3px 7px; margin-top:2px}
+
+/* ══ 司会メモ ══ */
+.notes{margin-top:42px; border-top:1px solid #0d3a52; padding-top:28px}
+.notes h2{font-family:var(--f-logo); font-size:18px; color:var(--gold); margin:0 0 18px; font-weight:400}
+.note-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(258px,1fr)); gap:18px}
+.note{border:1px solid #0d3a52; background:rgba(6,18,30,.6); padding:18px 20px}
+.note h3{margin:0 0 11px; font-family:var(--f-num); font-weight:700; font-size:11px; letter-spacing:.2em; color:var(--cyan)}
+.note ul{margin:0; padding-left:16px; display:grid; gap:8px}
+.note li,.note p{font-size:13.8px; line-height:1.72; color:#dfe9f4; margin:0}
+.note li b,.note p b{color:var(--gold-hi); font-weight:900}
+
+/* タネ明かし */
+.spoiler{display:none}
+body.reveal-all .spoiler{display:inline-block; margin-left:12px; font-family:var(--f-num); font-weight:700; font-size:14px; letter-spacing:.1em; color:#63e8a1; border:1px solid rgba(47,191,109,.55); padding:1px 9px; vertical-align:3px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important}
+}
+</style>
+
+<div class="shell">
+  <div class="logo-row">
+    <div class="logo">
+      <div class="mark">三次会<span class="yen">¥</span>ミリオネア</div>
+      <span class="sub">4 CHOICES &nbsp;/&nbsp; 10 QUESTIONS &nbsp;/&nbsp; 16:9</span>
+    </div>
+    <div class="tools">
+      <button class="ghost key" id="fsBtn">全画面で投影</button>
+      <button class="ghost" id="spoilerBtn" aria-pressed="false">タネ明かし</button>
+      <button class="ghost" id="resetBtn">最初から</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen">
+    <div class="frame" id="frame">
+      <div class="stage" id="stage"></div>
+    </div>
+  </div>
+
+  <div class="deck" id="deck"></div>
+
+  <section class="notes">
+    <h2>司会用メモ（投影されません）</h2>
+    <div class="note-grid">
+      <div class="note">
+        <h3>PROJECTION</h3>
+        <ul>
+          <li>画面は<b>16:9固定</b>。どの解像度でも同じ見え方になります</li>
+          <li><b>「全画面で投影」</b>でスクリーン部分だけが全画面に。司会メモは映りません</li>
+          <li>全画面のままキーボードで操作できます（下記）</li>
+          <li>PCを<b>拡張ディスプレイ</b>にしてブラウザをプロジェクタ側へ移し、そこで全画面にするのが理想。手元のPCには何も映りませんので、進行はキー操作で</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h3>CONTROL</h3>
+        <ul>
+          <li><b>A〜D</b>（<b>1〜4</b>でも可）で選択 → <b>Enter</b>でファイナルアンサー → <b>Enter</b>で次の問題</li>
+          <li><b>F</b>で全画面の切り替え、<b>Esc</b>でオーバーレイを閉じる</li>
+          <li>ライフラインは画面右上をクリック（1回ずつ使用可）</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h3>PROGRAM</h3>
+        <ul>
+          <li><b>掴み（30秒）</b>「本日最後の余興です。全10問、賞金は……出ません」</li>
+          <li><b>ルール（30秒）</b>4択・全員参加・指でA〜Dを出してもらう</li>
+          <li><b>出題（12分）</b>1問1分強。迷ったら即答えを開ける</li>
+          <li><b>締め（1分）</b>最終問題の答えからそのまま拍手へ</li>
+          <li><b>10分に縮めるなら</b>Q5（決まり文句）とQ9（未来予知）を飛ばす</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h3>REWRITE</h3>
+        <p>司会卓に<b>「要ヒアリング」</b>と出る5問（Q1・Q4・Q6・Q7・Q8）は二人にまつわる問題です。前日までに本人へ答えを聞いて選択肢を作り替えてください。<b>残り5問はそのまま使えます。</b></p>
+        <p style="margin-top:10px">コツは<b>実話1つ＋もっともらしい嘘3つ</b>。嘘の3つも本人らしさが出るものにすると、会場が本気で迷います。</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const LET = ["A","B","C","D"];
+
+const HAND = [
+  ["一","萬",1],["二","萬"],["三","萬"],["四","萬"],["|"],
+  ["五","筒"],["六","筒"],["七","筒"],["九","筒"],["|"],
+  ["東"],["東"],["東"],["白"],["白"]
+];
+
+const Q = [
+  {
+    q:"本日の新婦、お色直しのドレスは何色だったでしょう？",
+    sub:"全員が見ていたはず", prep:true,
+    a:["シャンパンゴールド","ペールブルー","くすみピンク","ミントグリーン"],
+    sw:["#e3cf9c","#b4d2ea","#dfb3b6","#b8dcc2"],
+    ans:0, poll:[28,26,24,22],
+    phone:"（新婦）……そこ、間違えたら承知しませんからね。",
+    ok:"正解！ ちゃんと見ていましたね。本日いちばん見られていた人の話です。",
+    ng:"残念。……新婦、この方の顔、覚えておいてください。",
+    tip:"1問目はこれで決まり。全員が実物を見ているのに驚くほど割れます。実際の色に合わせてA〜Dと色見本を差し替えを（似た系統を3つ並べるのがコツ）。新郎のネクタイ／チーフの色に替えると、さらに誰も答えられない難問になります。"
+  },
+  {
+    q:"三次会の会場に着いてから10分以内に、必ず誰かが言うセリフは？",
+    sub:"肩慣らし", prep:false,
+    a:["「一次会の写真、あとで送って」","「これ、何次会だっけ？」","「とりあえず座ろっか」","「二人まだ来てないの？」"],
+    ans:2, poll:[23,21,32,24],
+    phone:"（新婦）Cじゃないですか。誰も座らないまま30分経つやつ。",
+    ok:"正解はC。ちなみに、そう言った人が最後まで立っている確率は9割です。",
+    ng:"正解はC。「とりあえず座ろっか」。言った本人がいちばん座らないやつです。",
+    tip:"1問目はわざと簡単めに。答え合わせのあと「今日、誰が最初に言いましたか？」と会場に振ると一気に和みます。"
+  },
+  {
+    q:"【何切る】オーラス、トップ目。親のリーチ一発目に、新郎のツモは中。何を切る？",
+    sub:"麻雀の心得", prep:false, tiles:true,
+    a:["一萬 ／ 場に2枚切れの端牌","九筒 ／ 現物ではないが端牌","白 ／ 1枚切れの字牌","中 ／ ツモ切り、ただし生牌"],
+    ans:2, poll:[18,22,34,26],
+    phone:"（新婦）……その卓、私も混ぜてくれるなら何を切ってもいいよ。",
+    ok:"正解はC、1枚切れの白。ただし本日の模範解答は「牌を置いて新婦のもとへ帰る」です。",
+    ng:"正解はC、1枚切れの白でした。なお本日の模範解答は「牌を置いて新婦のもとへ帰る」です。",
+    tip:"打つ人には本気の何切る、打たない人には雰囲気で参加できる問題。「麻雀わかる人います？」と挙手させてから出すと、その卓が勝手に議論を始めてくれます。"
+  },
+  {
+    q:"新郎がプロポーズのとき、実際に口にした第一声は？",
+    sub:"あの日のこと", prep:true,
+    a:["「これからもよろしくお願いします」","「一緒に暮らそう」","「そろそろ、どうかな」","「結婚してください」"],
+    ans:3, poll:[24,26,22,28],
+    phone:"（新婦）本人に聞いてください。私はもう一回聞きたいので。",
+    ok:"正解！ ではご本人から、当日の状況を30秒でどうぞ。",
+    ng:"残念。正解は本人の口から聞きましょう。新郎、お願いします。",
+    tip:"事前に新婦から正解を聞き、新郎には内緒に。4つとも実際にありそうな言い回しなので、当てた人は本当に鋭い人です。発表後「新郎、補足あります？」で自然にエピソードが出ます。"
+  },
+  {
+    q:"披露宴の新郎の挨拶で、いちばん多く使われている決まり文句は？",
+    sub:"統計のようなもの", prep:false,
+    a:["「若輩者ではございますが」","「ふつつか者ではございますが」","「未熟な二人ではございますが」","「至らぬ点も多いかと存じますが」"],
+    ans:0, poll:[27,25,22,26],
+    phone:"（新婦）全部聞いた気がします。今日だけで。",
+    ok:"正解はA。ちなみに本日の新郎は、この4つを全部使っていました。",
+    ng:"正解はA、「若輩者ではございますが」。なお本日の新郎は、4つ全部使っていました。",
+    tip:"どれも本当に使われる言い回しなので会場が本気で悩みます。答え合わせの一言が全てなので、そこだけは間を取って言い切ってください。"
+  },
+  {
+    q:"新郎が学生時代、部活でやらかした“語り継がれている失敗”は？",
+    sub:"語り継がれる伝説", prep:true,
+    a:["大会当日、ユニフォームを家に忘れてきた","集合時間を1時間間違え、無人の体育館にいた","部費を集めた封筒をまるごと落とした","顧問を3年間、違う名前で呼び続けていた"],
+    ans:0, poll:[27,25,24,24],
+    phone:"（新婦）その話、聞くたびに毎回オチが少しずつ盛られてます。",
+    ok:"正解！ では当時のチームメイトの方、証言をお願いします。",
+    ng:"残念、正解はA。……当時を知る方、いま一斉に手を挙げてください。",
+    tip:"実話1つ＋もっともらしい3つ、という作り方が正解。当時の友人が会場にいるなら、答え合わせのあとに30秒だけマイクを渡すと一気に盛り上がります。部活でなくても、バイト・サークル・受験の話に置き換えて成立します。本人が今も気にしている失敗は避けること。"
+  },
+  {
+    q:"新婦が新郎に「ここだけは直してほしい」と思っていることは？",
+    sub:"夫婦のリアル", prep:true,
+    a:["「あとでやる」の“あと”が来ない","電気をつけたまま次の部屋へ行く","返信がスタンプ1個で終わる","惣菜の容器を洗わずに置いておく"],
+    ans:0, poll:[29,23,25,23],
+    phone:"（新婦）……全部です、と言ったら怒られますか？",
+    ok:"正解！ 新婦、いま静かにうなずきました。",
+    ng:"残念。ではご本人から発表をお願いします。……新郎、聞く準備はいいですか？",
+    tip:"4つとも実話寄りに差し替えるほど強くなります。答えを聞いたあと「他にもあります？」と振ると、あと3つ出てきます。そこで止めるのが司会の仕事です。"
+  },
+  {
+    q:"新郎の学生時代のあだ名、その由来は？",
+    sub:"学生時代", prep:true,
+    a:["苗字をそのまま略しただけ","一度きりの失敗が語り継がれた","誰かに似ていると言われ続けた","本人が自分で名乗り始めた"],
+    ans:1, poll:[26,28,24,22],
+    phone:"（新婦）その話、私もう10回は聞いてます。",
+    ok:"正解！ では、その一度きりの現場に居合わせた方——3人ほど手を挙げてください。",
+    ng:"正解はB。当時を知る方、いま一斉に手を挙げてください。",
+    tip:"Q6と続けて出すと学生時代の友人が主役の時間になります。同期中心の会なら片方を「新卒研修でのやらかし」に差し替えを。"
+  },
+  {
+    q:"この三次会、このあと最も高い確率で起こることは？",
+    sub:"未来予知", prep:false,
+    a:["誰かが一次会の写真を全員に送り始める","帰るはずだった人が結局最後までいる","新郎が同じ話を二回する","会計で誰かが「多めに出すよ」と言う"],
+    ans:1, poll:[22,31,23,24],
+    phone:"（新婦）Bです。毎回Bです。だいたい同じ人です。",
+    ok:"正解はB。……さっき「そろそろ帰る」と言った方、覚えましたからね。",
+    ng:"正解はB。さっき「そろそろ帰る」と言った方、こちらは覚えています。",
+    tip:"読み上げながら、実際に「帰る」と言っていた人の方を見るだけで成立します。ここで空気を温めて最終問題へ。"
+  },
+  {
+    q:"最終問題です。この二人が、これから生涯で最も多く交わすことになる言葉は？",
+    sub:"ファイナルアンサー", prep:false,
+    a:["「おかえり」","「ありがとう」","「ごめん」","「今日、何食べたい？」"],
+    ans:3, poll:[21,26,19,34],
+    phone:"（新婦）……ずるい問題出しますね。Dで。",
+    ok:"正解はD、「今日、何食べたい？」。生涯で最も多く交わされる問いだそうです。……ですがその裏側には、必ずAとBがあります。",
+    ng:"正解はD、「今日、何食べたい？」。生涯で最も多く交わされる問いだそうです。……ですがその裏側には、必ずAとBがあります。",
+    tip:"ここだけは笑わせにいかず、素直に読むのが正解。「AとBがあります」で一拍おいて、そのまま「では、あらためてお二人に大きな拍手を！」へ繋げます。"
+  }
+];
+
+const ICON_PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.9c1.5 2.9 3.9 5.3 6.8 6.8l2.3-2.3c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.5 21 3 13.5 3 4.1c0-.6.4-1 1-1h3.4c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.4 0 .8-.2 1l-2.2 2.2z"/></svg>';
+const ICON_CROWD = '<svg viewBox="0 0 32 21" aria-hidden="true"><circle cx="16" cy="6" r="4.3"/><path d="M8.4 21c0-4.2 3.4-7.6 7.6-7.6s7.6 3.4 7.6 7.6z"/><circle cx="5.3" cy="9" r="3.2"/><path d="M0 21c0-3.1 2.4-5.6 5.4-5.6.9 0 1.8.2 2.6.6C6.4 17.4 5.4 19.1 5.2 21z"/><circle cx="26.7" cy="9" r="3.2"/><path d="M32 21c0-3.1-2.4-5.6-5.4-5.6-.9 0-1.8.2-2.6.6 1.6 1.4 2.6 3.1 2.8 5z"/></svg>';
+
+const screenEl = document.getElementById("screen");
+const frame = document.getElementById("frame");
+const stage = document.getElementById("stage");
+const deck = document.getElementById("deck");
+let idx = 0, sel = null, phase = "pick", used = {}, dead = [], panel = null, score = 0, results = [];
+
+function fit(){
+  document.documentElement.style.setProperty("--s", (frame.clientWidth / 1280).toString());
+}
+window.addEventListener("resize", fit);
+document.addEventListener("fullscreenchange", () => setTimeout(fit, 60));
+if(window.ResizeObserver) new ResizeObserver(fit).observe(frame);
+
+function tileEl(t){
+  if(t[0] === "|") return '<div class="tile-sep"></div>';
+  if(t.length === 1) return `<div class="tile solo"><span>${t[0]}</span></div>`;
+  return `<div class="tile${t[2] ? " red" : ""}"><span>${t[0]}</span><span>${t[1]}</span></div>`;
+}
+
+function burstHTML(){
+  return `<div class="burst">
+    <div class="core"></div><div class="rays"></div><div class="rays2"></div>
+    <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="ring r4"></div>
+  </div><div class="vig"></div>`;
+}
+
+function overlayHTML(){
+  if(!panel) return "";
+  const q = Q[idx];
+  if(panel === "poll"){
+    let rows = "";
+    q.poll.forEach((v, i) => {
+      rows += `<div class="poll-row"><span class="l">${LET[i]}</span><div class="bar"><i style="width:${v}%"></i></div><span class="v">${v}%</span></div>`;
+    });
+    return `<div class="overlay"><h3>AUDIENCE &mdash; 会場に聞く</h3><div class="poll">${rows}</div><button class="ov-close" id="ovClose">閉じる</button></div>`;
+  }
+  return `<div class="overlay"><h3>TELEPHONE &mdash; 新婦に電話</h3><p class="phone-line">${q.phone}</p><button class="ov-close" id="ovClose">閉じる</button></div>`;
+}
+
+function render(){
+  if(idx >= Q.length){ renderFinale(); return; }
+  const q = Q[idx];
+  const dis = phase !== "pick";
+  const longA = q.a.some(t => t.length >= 15);
+
+  let rows = "";
+  for(let r = 0; r < 2; r++){
+    let cells = "";
+    for(let c = 0; c < 2; c++){
+      const i = r * 2 + c;
+      let cls = "plate";
+      if(dead.includes(i)) cls += " dead";
+      if(phase === "confirm" && sel === i) cls += " sel";
+      if(phase === "done"){
+        if(i === q.ans) cls += " right";
+        else if(i === sel) cls += " miss";
+      }
+      const d = (dis || dead.includes(i)) ? " disabled" : "";
+      const sp = i === q.ans ? '<span class="spoiler">正解</span>' : "";
+      const sw = q.sw ? `<span class="sw" style="background:${q.sw[i]}"></span>` : "";
+      cells += `<button class="${cls}" data-i="${i}"${d}><span class="in"><span class="letter"><span class="dia">◆</span>${LET[i]}:</span><span class="atext${longA ? " long" : ""}">${sw}${q.a[i]}${sp}</span></span></button>`;
+    }
+    rows += `<div class="arow">${cells}</div>`;
+  }
+
+  const tiles = q.tiles
+    ? `<div class="tiles">${HAND.map(tileEl).join("")}<div class="tsumo"><span class="tsumo-label">ツモ</span>${tileEl(["中"])}</div></div>`
+    : "";
+
+  stage.innerHTML = burstHTML() + `
+  <div class="hud">
+    <div class="qslot">
+      <p class="cap">QUESTION</p>
+      <div class="qplate"><span class="in"><span class="n">${idx + 1}</span><span class="t">/ ${Q.length}</span></span></div>
+    </div>
+    <div class="lifelines">
+      <button class="ll" id="ll-fifty" title="フィフティ・フィフティ"${used.fifty || dis ? " disabled" : ""}><span class="fifty">50:50</span></button>
+      <button class="ll" id="ll-phone" title="新婦に電話"${used.phone || dis ? " disabled" : ""}>${ICON_PHONE}</button>
+      <button class="ll" id="ll-poll" title="会場に聞く"${used.poll || dis ? " disabled" : ""}>${ICON_CROWD}</button>
+    </div>
+  </div>
+  <div class="qzone">
+    <div class="qrow"><div class="plate qbox"><div class="in">
+      <p class="qtext${q.q.length >= 34 ? " long" : ""}">${q.q}</p>${tiles}
+      <p class="qsub">${q.sub}</p>
+    </div></div></div>
+    ${rows}
+  </div>` + overlayHTML();
+
+  renderDeck();
+  bind();
+  fit();
+}
+
+function renderDeck(){
+  const q = Q[idx];
+  const tag = q.prep
+    ? '<span class="tagline prep">要ヒアリング</span>'
+    : '<span class="tagline free">このまま使える</span>';
+  let con = "";
+  if(phase === "pick"){
+    con = `<p class="idle-hint">選択肢を押すか、<kbd>A</kbd><kbd>B</kbd><kbd>C</kbd><kbd>D</kbd> キーで選択。そのあと <kbd>Enter</kbd> で「ファイナルアンサー」。<br><kbd>F</kbd> で全画面。</p>`;
+  } else if(phase === "confirm"){
+    con = `<div class="cbar"><span class="final-q">ファイナルアンサー？</span>
+      <button class="btn" id="finalBtn">ファイナルアンサー</button>
+      <button class="btn calm" id="backBtn">選び直す</button></div>`;
+  } else if(phase === "suspense"){
+    con = `<div class="cbar"><span class="dots"><i></i><i></i><i></i></span></div>`;
+  } else {
+    const ok = sel === q.ans;
+    con = `<p class="verdict ${ok ? "ok" : "ng"}">${ok ? "正解！" : "残念！"}</p>
+      <p class="say">${ok ? q.ok : q.ng}</p>
+      <div class="mc-tip"><span class="tag">MC</span><span>${q.tip}</span></div>
+      <div class="cbar" style="margin-top:16px"><button class="btn" id="nextBtn">${idx === Q.length - 1 ? "結果を見る" : "次の問題へ"}</button></div>`;
+  }
+  deck.innerHTML = `<div class="console">
+    <div class="con-head"><span class="lbl">HOST CONSOLE &nbsp;/&nbsp; Q${idx + 1}</span>${tag}</div>${con}</div>`;
+}
+
+function renderFinale(){
+  stage.innerHTML = burstHTML() + `<div class="finale">
+    <p class="big">全${Q.length}問、終了！</p>
+    <p class="score">${results.map(r => r ? "◯" : "×").join(" &nbsp;")} &nbsp;&nbsp;正解 ${score} / ${Q.length}</p>
+    <p class="line">どの問題も、正解より“あるある”のほうが多い出題でした。<br>これからのお二人の毎日も、だいたいそんな感じで続いていくんだと思います。</p>
+  </div>`;
+  deck.innerHTML = `<div class="console">
+    <div class="con-head"><span class="lbl">HOST CONSOLE &nbsp;/&nbsp; FINISH</span></div>
+    <p class="say">「あらためて、お二人に大きな拍手をお願いします！」</p>
+    <div class="cbar"><button class="btn" id="againBtn">もう一度やる</button></div></div>`;
+  document.getElementById("againBtn").onclick = reset;
+  fit();
+}
+
+function bind(){
+  stage.querySelectorAll(".arow .plate").forEach(b => {
+    b.onclick = () => { sel = +b.dataset.i; phase = "confirm"; panel = null; render(); };
+  });
+  const oc = document.getElementById("ovClose");
+  if(oc) oc.onclick = () => { panel = null; render(); };
+
+  const lf = document.getElementById("ll-fifty");
+  if(lf) lf.onclick = () => {
+    used.fifty = true;
+    const wrong = [0,1,2,3].filter(i => i !== Q[idx].ans);
+    dead = [wrong[0], wrong[2]];
+    render();
+  };
+  const lp = document.getElementById("ll-poll");
+  if(lp) lp.onclick = () => { used.poll = true; panel = "poll"; render(); };
+  const lc = document.getElementById("ll-phone");
+  if(lc) lc.onclick = () => { used.phone = true; panel = "phone"; render(); };
+
+  const f = document.getElementById("finalBtn");
+  if(f) f.onclick = lockIn;
+  const bk = document.getElementById("backBtn");
+  if(bk) bk.onclick = () => { sel = null; phase = "pick"; render(); };
+  const nx = document.getElementById("nextBtn");
+  if(nx) nx.onclick = next;
+}
+
+function lockIn(){
+  phase = "suspense"; panel = null;
+  document.body.classList.add("suspense");
+  render();
+  const slow = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  setTimeout(() => {
+    document.body.classList.remove("suspense");
+    phase = "done";
+    const ok = sel === Q[idx].ans;
+    results[idx] = ok;
+    if(ok) score++;
+    render();
+  }, slow ? 2100 : 250);
+}
+
+function next(){ idx++; sel = null; phase = "pick"; dead = []; panel = null; render(); }
+function reset(){ idx = 0; sel = null; phase = "pick"; dead = []; panel = null; used = {}; score = 0; results = []; render(); }
+
+function toggleFull(){
+  if(document.fullscreenElement) document.exitFullscreen();
+  else if(screenEl.requestFullscreen) screenEl.requestFullscreen();
+}
+
+document.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  if(k === "f"){ e.preventDefault(); toggleFull(); return; }
+  let i = -1;
+  if(k.length === 1 && "abcd".includes(k)) i = "abcd".indexOf(k);
+  else if(k >= "1" && k <= "4") i = +k - 1;
+
+  if(i >= 0 && phase === "pick" && !dead.includes(i)){
+    sel = i; phase = "confirm"; panel = null; render();
+  } else if(e.key === "Enter"){
+    if(phase === "confirm") lockIn();
+    else if(phase === "done") next();
+  } else if(e.key === "Escape" && panel){
+    panel = null; render();
+  }
+});
+
+document.getElementById("fsBtn").onclick = toggleFull;
+document.getElementById("spoilerBtn").onclick = e => {
+  const on = document.body.classList.toggle("reveal-all");
+  e.currentTarget.setAttribute("aria-pressed", String(on));
+};
+document.getElementById("resetBtn").onclick = reset;
+
+fit();
+render();
+</script>
